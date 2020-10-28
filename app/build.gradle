@@ -1,0 +1,78 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+android {
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+    useLibrary 'org.apache.http.legacy'
+
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+    defaultConfig {
+        applicationId "com.shop.mall"
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        //启用 Dalvik 可执行文件分包
+        multiDexEnabled true
+        ndk {
+            abiFilters "armeabi-v7a", "x86"// ,"armeabi" //,"arm64-v8a"//
+        }
+        manifestPlaceholders = [
+                BUGLY_APPID: "7c93af3d46",
+//                    JPUSH_APPKEY       : "63c21a78832635c8e22b5ab9",
+//                    JPUSH_CHANNEL      : "developer-default",
+        ]
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            resValue "string", "app_name", "商城Demo(debug)"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            zipAlignEnabled true
+            resValue "string", "app_name", "商城Demo"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def variantName
+            if ('debug'.equals(variant.buildType.name)) {
+                variantName = "debug"
+            } else {
+                variantName = "release"
+            }
+            output.outputFileName = "_${variant.flavorName}_v${variant.versionName}_${variant.versionCode}_${buildTime()}_${variantName}.apk"
+        }
+    }
+}
+
+def buildTime() {
+    def date = new Date()
+    def formatDate = date.format('yyMMddHHmmss')
+    return formatDate
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    api project(':arms')
+    if (!isModule.toBoolean()) {
+        implementation project(':test')
+        implementation project(':main')
+    }
+}
+

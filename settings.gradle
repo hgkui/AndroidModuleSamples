@@ -1,0 +1,5 @@
+include ':main'
+include ':test'
+include ':arms'
+include ':app'
+rootProject.name = "shop-android"
